@@ -1,7 +1,13 @@
 const express = require('express'); // Importa a biblioteca
 const server = express(); // Cria um servidor
-const path = require('path'); //pega o caminho do arquivo pra vc
+
 const cors = require("cors"); //resolve ataque cors
+const stripHtml = require("string-strip-html");
+const dayjs = require('dayjs')
+
+
+// console.log(dayjs().format('HH:mm:ss') )
+
 
 server.use(express.json());
 server.use(cors());
@@ -12,25 +18,27 @@ let cameIntoRoom = [];
 server.post("/participants", (req, res) => {
     console.log(req.body);
     const { name } = req.body;
+    
 
     if (name === " ") {
         res.sendStatus(400);
     } else {
-        participants.push({name: name, lastStatus: Date.now()})
+        const { result } = stripHtml(name);
+    
+        participants.push({name: result, lastStatus: Date.now()})
+
         cameIntoRoom.push(
-            { from: name, 
+            { from: result, 
             to: 'Todos', 
             text: 'entra na sala...', 
             type: 'status', 
-            time: 'HH:MM:SS'}
+            time: dayjs().format('HH:mm:ss')}
         );
         
-        
-        
     }
-    res.send(`<h1>Olá Paola!</h1>`)
-    console.log(participants);
-    console.log(cameIntoRoom);
+    res.status(200);
+
+    
 })
 
 // Configura o servidor para rodar na porta 3000
