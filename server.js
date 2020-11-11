@@ -16,7 +16,7 @@ let participants = [];
 let cameIntoRoom = [];
 
 server.post("/participants", (req, res) => {
-    console.log(req.body);
+    
     const { name } = req.body;
     
 
@@ -37,7 +37,8 @@ server.post("/participants", (req, res) => {
         
     }
     res.status(200);
-
+    console.log(participants);
+    console.log(cameIntoRoom);
     
 })
 
