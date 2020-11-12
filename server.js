@@ -36,7 +36,7 @@ server.post("/participants", (req, res) => {
     } else {
         const { result } = stripHtml(name);
         participants.push({name: result, lastStatus: Date.now()}) 
-        messages.unshift(
+        messages.push(
             { from: result, 
             to: 'Todos', 
             text: 'entra na sala...', 
@@ -114,9 +114,26 @@ server.post("/messages", (req, res) => {
 })
 
 server.get("/participants", (req, res) => {
-   res.status(200).send(participants);  ;
+   res.status(200).send(participants);
 
 })
+
+
+server.post("/status", (req, res) => {
+    const { name } = req.body;
+
+    const participantValidation = participants.some(p => p.name === name);
+    
+    if (!participantValidation) {
+        res.status(400).send("Participante nao consta na lista");
+    } else {
+        participants = participants.filter(p => p.name !== name);
+        participants.push({name, lastStatus: Date.now()}) 
+        res.sendStatus(200);
+    }
+    
+ })
+ 
 
 // Configura o servidor para rodar na porta 3000
 server.listen(3000);
