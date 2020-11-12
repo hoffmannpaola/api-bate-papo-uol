@@ -47,7 +47,7 @@ server.post("/participants", (req, res) => {
         res.sendStatus(200);
     }
     
-    console.log(participants);
+    // console.log(participants);
     
     
 })
@@ -55,39 +55,63 @@ server.post("/participants", (req, res) => {
 
 server.get("/messages", (req, res) => {
     res.send(messages);
-    console.log(messages);
+    // console.log(messages);
 })
 
 
-// server.post("/messages", (req, res) => {
-//     const { from, to, text, type } = req.body;
-//     console.log(text);
-//     if (  from == " " || to == " " || text == " ") {
-//         return res.status(400).send("String Vazia");
-//     }
+server.post("/messages", (req, res) => {
+    const arrayMessage = [req.body];
 
-//     const participantValidation = participants.some(p => p.name === from);
-//     console.log(participantValidation);
-//     if (participantValidation) {
-//         if  (type === 'message' || type === 'private_message')  {
+    arrayMessage.forEach(item => {
+        if (item.from !== " "){
+            const { result } = stripHtml(item.from);
+            item.from = result.trim();
+        } else {
+            return res.status(400).send("String Vazia");
+        }
 
-//             const { result } = stripHtml(from);
-//             const { result } = stripHtml(to);
-//             const { result } = stripHtml(text);
-//             const { result } = stripHtml(type);
-//             console.log(result)
-//             messages.push(
-//                 { from,
-//                 to,
-//                 text, 
-//                 type, 
-//                 time: dayjs().format('HH:mm:ss')}
-//             ); 
-//             return res.sendStatus(200);    
-//         }
-//     }
-//     return res.status(400).send("Não atendeu a tudo");
-// })
+        if (item.to !== " ") {
+            const { result } = stripHtml(item.to);
+            item.to = result.trim();
+        } else {
+            return res.status(400).send("String Vazia");
+        }
+
+        if (item.text !== " ") {
+            const { result } = stripHtml(item.text);
+            item.text = result.trim();
+        } else {
+            return res.status(400).send("String Vazia");
+        }
+
+        if (item.type !== " ") {
+            const { result } = stripHtml(item.type);
+            item.type = result.trim();
+        } else {
+            return res.status(400).send("String Vazia");
+        }
+    });
+
+    const objFromMessage = arrayMessage[0];
+    
+
+    const participantValidation = participants.some(p => p.name === objFromMessage.from);
+    
+    if (participantValidation) {
+        if  (objFromMessage.type === 'message' || objFromMessage.type === 'private_message')  {
+            messages.push(
+                { from: objFromMessage.from,
+                to: objFromMessage.to,
+                text: objFromMessage.text,
+                type: objFromMessage.type, 
+                time: dayjs().format('HH:mm:ss')}
+            ); 
+            return res.sendStatus(200);    
+        }
+    }
+    
+})
+
 
 
 // Configura o servidor para rodar na porta 3000

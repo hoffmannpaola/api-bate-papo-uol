@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/hoffmannpaola/10-api-bate-papo-uol#readme",
   "dependencies": {
+    "ast-monkey-traverse": "^1.12.21",
     "cors": "^2.8.5",
     "dayjs": "^1.9.6",
     "express": "^4.17.1",
