@@ -53,7 +53,9 @@ server.post("/participants", (req, res) => {
 
 
 server.get("/messages", (req, res) => {
-    res.send(messages.slice(0, 101));
+    const limit = req.query.limit || -100;
+    const filteredMessages = messages.slice(0, limit)
+    res.send(messages.slice(filteredMessages));
     
 })
 
@@ -111,7 +113,10 @@ server.post("/messages", (req, res) => {
     
 })
 
+server.get("/participants", (req, res) => {
+   res.status(200).send(participants);  ;
 
+})
 
 // Configura o servidor para rodar na porta 3000
 server.listen(3000);
