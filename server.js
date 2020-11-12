@@ -46,7 +46,7 @@ server.post("/participants", (req, res) => {
         res.sendStatus(200);
     }
     
-    // console.log(participants);
+    console.log(participants);
     
     
 })
@@ -134,6 +134,31 @@ server.post("/status", (req, res) => {
     
  })
  
+ setInterval(automaticRemoval, 15000);
+ 
+ function automaticRemoval() {
+
+    if (participants.length > 0){
+        participants.forEach(p => {
+            const validation = Date.now() - p.lastStatus;
+            
+            if (validation > 10000) {
+                //expulsar participante
+                participants = participants.filter(item => item.name !== p.name);
+                messages.push(
+                    { from: p.name, 
+                    to: 'Todos', 
+                    text: 'sai na sala...', 
+                    type: 'status', 
+                    time: dayjs().format('HH:mm:ss')}
+                ); 
+               
+            }
+        })
+        console.log(participants);
+    }
+    
+ }
 
 // Configura o servidor para rodar na porta 3000
 server.listen(3000);
