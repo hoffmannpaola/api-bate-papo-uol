@@ -5,9 +5,8 @@ const cors = require("cors"); //resolve ataque cors
 const stripHtml = require("string-strip-html");
 const dayjs = require('dayjs')
 
-
 // console.log(dayjs().format('HH:mm:ss') )
-//push add ao final de um array
+//push add ao final de um array, ou seja, embaixo.
 
 server.use(express.json());
 server.use(cors());
@@ -37,7 +36,7 @@ server.post("/participants", (req, res) => {
     } else {
         const { result } = stripHtml(name);
         participants.push({name: result, lastStatus: Date.now()}) 
-        messages.push(
+        messages.unshift(
             { from: result, 
             to: 'Todos', 
             text: 'entra na sala...', 
@@ -54,8 +53,8 @@ server.post("/participants", (req, res) => {
 
 
 server.get("/messages", (req, res) => {
-    res.send(messages);
-    // console.log(messages);
+    res.send(messages.slice(0, 101));
+    
 })
 
 
