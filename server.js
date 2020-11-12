@@ -26,7 +26,7 @@ const messages = [ {
     type: 'status',
     time: '21:46:33' }
 ];
-// console.log(arrayMessages);
+// console.log(messages);
 
 server.post("/participants", (req, res) => {
     
@@ -37,15 +37,16 @@ server.post("/participants", (req, res) => {
     } else {
         const { result } = stripHtml(name);
         participants.push({name: result, lastStatus: Date.now()}) 
-        arrayMessages.push(
+        messages.push(
             { from: result, 
             to: 'Todos', 
             text: 'entra na sala...', 
             type: 'status', 
             time: dayjs().format('HH:mm:ss')}
         ); 
+        res.sendStatus(200);
     }
-    res.status(200);
+    
     console.log(participants);
     
     
@@ -54,36 +55,39 @@ server.post("/participants", (req, res) => {
 
 server.get("/messages", (req, res) => {
     res.send(messages);
-    // console.log(arrayMessages);
+    console.log(messages);
 })
 
 
-server.post("/messages", (req, res) => {
-    const { from, to, text, type } = req.body;
+// server.post("/messages", (req, res) => {
+//     const { from, to, text, type } = req.body;
+//     console.log(text);
+//     if (  from == " " || to == " " || text == " ") {
+//         return res.status(400).send("String Vazia");
+//     }
 
-    if ( (from  === " ") && (to === " ") && (text === " ") ) {
-        return res.sendStatus(400);
-    }
+//     const participantValidation = participants.some(p => p.name === from);
+//     console.log(participantValidation);
+//     if (participantValidation) {
+//         if  (type === 'message' || type === 'private_message')  {
 
-    const participantValidation = participants.some(p => p.name === from);
-
-    if (participantValidation) {
-        if  (type === 'message' || type === 'private_message')  {
-            arrayMessages.push(
-                { from,
-                to,
-                text, 
-                type, 
-                time: dayjs().format('HH:mm:ss')}
-            ); 
-            return res.sendStatus(200);    
-        }
-    }
-    return res.sendStatus(400);
-})
-
-
-
+//             const { result } = stripHtml(from);
+//             const { result } = stripHtml(to);
+//             const { result } = stripHtml(text);
+//             const { result } = stripHtml(type);
+//             console.log(result)
+//             messages.push(
+//                 { from,
+//                 to,
+//                 text, 
+//                 type, 
+//                 time: dayjs().format('HH:mm:ss')}
+//             ); 
+//             return res.sendStatus(200);    
+//         }
+//     }
+//     return res.status(400).send("Não atendeu a tudo");
+// })
 
 
 // Configura o servidor para rodar na porta 3000
