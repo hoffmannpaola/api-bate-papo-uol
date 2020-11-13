@@ -1,37 +1,30 @@
 const express = require('express'); // Importa a biblioteca
+const cors = require('cors'); //resolve ataque cors
+const stripHtml = require('string-strip-html');
+const dayjs = require('dayjs');
+const fs = require('fs');
+const path = require('path');
+
 const server = express(); // Cria um servidor
-
-const cors = require("cors"); //resolve ataque cors
-const stripHtml = require("string-strip-html");
-const dayjs = require('dayjs')
-
 server.use(express.json());
 server.use(cors());
 
 // console.log(dayjs().format('HH:mm:ss') )
 //push add ao final de um array, ou seja, embaixo.
 
+const jsonUpdate = (fileName, json) => 
+    fs.writeFileSync(fileName, JSON.stringify(json));
 
 setInterval(automaticRemoval, 15000);
 
-let participants = [
-    { name: 'Gina', lastStatus: 1605280426827 },
-    { name: 'Draco', lastStatus: 1605280426827 },
-];
+const pathParticipants = path.resolve("./data/participants.json");
+const fileContentParticipants = fs.readFileSync(pathParticipants)
+let participants = JSON.parse(fileContentParticipants);
 
+const pathMessages = path.resolve("./data/messages.json");
+const fileContentMessages = fs.readFileSync(pathMessages)
+let messages = JSON.parse(fileContentMessages);
 
-const messages = [ { 
-    from: 'Paola',
-    to: 'Todos',
-    text: 'entra na sala...',
-    type: 'status',
-    time: '21:49:20' },
-    { from: 'Birigui',
-    to: 'Todos',
-    text: 'entra na sala...',
-    type: 'status',
-    time: '21:46:33' }
-];
 console.log(messages);
 
 server.post("/participants", (req, res) => {
@@ -43,6 +36,9 @@ server.post("/participants", (req, res) => {
         return res.sendStatus(400);
     } else {
         participants.push({name: clearName, lastStatus: Date.now()}) 
+        const newFileContentP = JSON.stringify(participants);  
+        fs.writeFileSync(pathParticipants, newFileContentP);  
+
         messages.push(
             { from: clearName, 
             to: 'Todos', 
@@ -50,6 +46,10 @@ server.post("/participants", (req, res) => {
             type: 'status', 
             time: dayjs().format('HH:mm:ss')}
         ); 
+
+        const newFileContentM = JSON.stringify(messages);  
+        fs.writeFileSync(pathMessages, newFileContentM);  
+
         res.sendStatus(200);
     }
     
@@ -73,8 +73,7 @@ server.get("/messages", (req, res) => {
         } else {
             filteredMessages.push(msg);
         }
-    })
-    
+    });
 
     const limit = req.query.limit || -100;
     const limitedMessages = filteredMessages.slice(0, limit)
@@ -106,6 +105,10 @@ server.post("/messages", (req, res) => {
                 type: clearType, 
                 time: dayjs().format('HH:mm:ss')}
             ); 
+
+            const newFileContentM = JSON.stringify(messages);  
+            fs.writeFileSync(pathMessages, newFileContentM);  
+
             return res.sendStatus(200);    
         }
     }
@@ -128,7 +131,10 @@ server.post("/status", (req, res) => {
         res.status(400).send("Participante nao consta na lista");
     } else {
         participants = participants.filter(p => p.name !== clearName);
-        participants.push({name: clearName, lastStatus: Date.now()}) 
+        participants.push({name: clearName, lastStatus: Date.now()});
+        const newFileContentP = JSON.stringify(participants);  
+        fs.writeFileSync(pathParticipants, newFileContentP);  
+
         res.sendStatus(200);
     }
     
@@ -157,6 +163,8 @@ function automaticRemoval() {
                     type: 'status', 
                     time: dayjs().format('HH:mm:ss')}
                 ); 
+                const newFileContentM = JSON.stringify(messages);  
+                fs.writeFileSync(pathMessages, newFileContentM);  
                
             }
         })
