@@ -5,16 +5,23 @@ const cors = require("cors"); //resolve ataque cors
 const stripHtml = require("string-strip-html");
 const dayjs = require('dayjs')
 
-// console.log(dayjs().format('HH:mm:ss') )
-//push add ao final de um array, ou seja, embaixo.
-
 server.use(express.json());
 server.use(cors());
 
-let participants = [];
+// console.log(dayjs().format('HH:mm:ss') )
+//push add ao final de um array, ou seja, embaixo.
+
+
+setInterval(automaticRemoval, 15000);
+
+let participants = [
+    { name: 'Gina', lastStatus: 1605280426827 },
+    { name: 'Draco', lastStatus: 1605280426827 },
+];
+
 
 const messages = [ { 
-    from: 'Maravilha',
+    from: 'Paola',
     to: 'Todos',
     text: 'entra na sala...',
     type: 'status',
@@ -30,14 +37,14 @@ const messages = [ {
 server.post("/participants", (req, res) => {
     
     const { name } = req.body;
+    const clearName = clearHTML(name);
     
-    if (name === " ") {
+    if (clearName == '') {
         return res.sendStatus(400);
     } else {
-        const { result } = stripHtml(name);
-        participants.push({name: result, lastStatus: Date.now()}) 
+        participants.push({name: clearName, lastStatus: Date.now()}) 
         messages.push(
-            { from: result, 
+            { from: clearName, 
             to: 'Todos', 
             text: 'entra na sala...', 
             type: 'status', 
@@ -61,50 +68,26 @@ server.get("/messages", (req, res) => {
 
 
 server.post("/messages", (req, res) => {
-    const arrayMessage = [req.body];
+    const { from, to, text, type } = req.body;
 
-    arrayMessage.forEach(item => {
-        if (item.from !== " "){
-            const { result } = stripHtml(item.from);
-            item.from = result.trim();
-        } else {
-            return res.status(400).send("String Vazia");
-        }
+    const clearFrom = clearHTML(from);
+    const clearTo = clearHTML(to);
+    const clearText = clearHTML(text);
+    const clearType= clearHTML(type);
 
-        if (item.to !== " ") {
-            const { result } = stripHtml(item.to);
-            item.to = result.trim();
-        } else {
-            return res.status(400).send("String Vazia");
-        }
-
-        if (item.text !== " ") {
-            const { result } = stripHtml(item.text);
-            item.text = result.trim();
-        } else {
-            return res.status(400).send("String Vazia");
-        }
-
-        if (item.type !== " ") {
-            const { result } = stripHtml(item.type);
-            item.type = result.trim();
-        } else {
-            return res.status(400).send("String Vazia");
-        }
-    });
-
-    const objFromMessage = arrayMessage[0];
+    if ( (clearFrom  == '') && (clearTo == '') && (clearText == '') ) {
+        return res.sendStatus(400);
+    }
     
-
-    const participantValidation = participants.some(p => p.name === objFromMessage.from);
+    const participantValidation = participants.some(p => p.name === clearFrom);
     
     if (participantValidation) {
-        if  (objFromMessage.type === 'message' || objFromMessage.type === 'private_message')  {
+        if  (clearType === 'message' || clearType === 'private_message')  {
             messages.push(
-                { from: objFromMessage.from,
-                to: objFromMessage.to,
-                text: objFromMessage.text,
-                type: objFromMessage.type, 
+                { from: clearFrom,
+                to: clearTo,
+                text: clearText,
+                type: clearType, 
                 time: dayjs().format('HH:mm:ss')}
             ); 
             return res.sendStatus(200);    
@@ -112,6 +95,7 @@ server.post("/messages", (req, res) => {
     }
     
 })
+
 
 server.get("/participants", (req, res) => {
    res.status(200).send(participants);
@@ -121,22 +105,27 @@ server.get("/participants", (req, res) => {
 
 server.post("/status", (req, res) => {
     const { name } = req.body;
-
-    const participantValidation = participants.some(p => p.name === name);
+    const clearName = clearHTML(name);
+    const participantValidation = participants.some(p => p.name === clearName);
     
     if (!participantValidation) {
         res.status(400).send("Participante nao consta na lista");
     } else {
-        participants = participants.filter(p => p.name !== name);
-        participants.push({name, lastStatus: Date.now()}) 
+        participants = participants.filter(p => p.name !== clearName);
+        participants.push({name: clearName, lastStatus: Date.now()}) 
         res.sendStatus(200);
     }
     
  })
  
- setInterval(automaticRemoval, 15000);
+
+function clearHTML(param) {
+    const { result } = stripHtml(param);
+    return result;
+}
+
  
- function automaticRemoval() {
+function automaticRemoval() {
 
     if (participants.length > 0){
         participants.forEach(p => {
@@ -156,9 +145,8 @@ server.post("/status", (req, res) => {
             }
         })
         console.log(participants);
-    }
-    
- }
+    } 
+}
 
 // Configura o servidor para rodar na porta 3000
 server.listen(3000);
