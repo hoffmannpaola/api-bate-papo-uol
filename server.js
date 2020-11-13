@@ -115,7 +115,7 @@ server.post("/status", (req, res) => {
     const participantValidation = participants.some(p => p.name === clearName);
     
     if (!participantValidation) {
-        res.status(400).send("Participante nao consta na lista");
+        res.sendStatus(400);
     } else {
         participants = participants.filter(p => p.name !== clearName);
         participants.push({name: clearName, lastStatus: Date.now()});
@@ -141,7 +141,7 @@ function automaticRemoval() {
             const validation = Date.now() - p.lastStatus;
             
             if (validation > 10000) {
-                //expulsar participante
+                
                 participants = participants.filter(item => item.name !== p.name);
 
                 messages.push(
@@ -156,9 +156,7 @@ function automaticRemoval() {
                
             };
         });
-        console.log(participants);
     }; 
 };
 
-// Configura o servidor para rodar na porta 3000
 server.listen(3000);
