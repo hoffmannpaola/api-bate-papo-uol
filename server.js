@@ -32,7 +32,7 @@ const messages = [ {
     type: 'status',
     time: '21:46:33' }
 ];
-// console.log(messages);
+console.log(messages);
 
 server.post("/participants", (req, res) => {
     
@@ -60,9 +60,25 @@ server.post("/participants", (req, res) => {
 
 
 server.get("/messages", (req, res) => {
+
+    const name = req.headers["user-name"];
+
+    const filteredMessages = [];
+
+    messages.forEach(msg => {
+        if(msg.type === "private_message") {
+            if(msg.from === name || msg.to === name || msg.to === "Todos") {
+                filteredMessages.push(msg);
+            }
+        } else {
+            filteredMessages.push(msg);
+        }
+    })
+    
+
     const limit = req.query.limit || -100;
-    const filteredMessages = messages.slice(0, limit)
-    res.send(messages.slice(filteredMessages));
+    const limitedMessages = filteredMessages.slice(0, limit)
+    res.send(filteredMessages.slice(limitedMessages));
     
 })
 
