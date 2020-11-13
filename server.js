@@ -1,5 +1,5 @@
-const express = require('express'); // Importa a biblioteca
-const cors = require('cors'); //resolve ataque cors
+const express = require('express'); 
+const cors = require('cors'); 
 const stripHtml = require('string-strip-html');
 const dayjs = require('dayjs');
 const fs = require('fs');
@@ -8,12 +8,6 @@ const path = require('path');
 const server = express(); // Cria um servidor
 server.use(express.json());
 server.use(cors());
-
-// console.log(dayjs().format('HH:mm:ss') )
-//push add ao final de um array, ou seja, embaixo.
-
-const jsonUpdate = (fileName, json) => 
-    fs.writeFileSync(fileName, JSON.stringify(json));
 
 setInterval(automaticRemoval, 15000);
 
@@ -24,8 +18,6 @@ let participants = JSON.parse(fileContentParticipants);
 const pathMessages = path.resolve("./data/messages.json");
 const fileContentMessages = fs.readFileSync(pathMessages)
 let messages = JSON.parse(fileContentMessages);
-
-console.log(messages);
 
 server.post("/participants", (req, res) => {
     
@@ -51,12 +43,9 @@ server.post("/participants", (req, res) => {
         fs.writeFileSync(pathMessages, newFileContentM);  
 
         res.sendStatus(200);
-    }
+    };
     
-    console.log(participants);
-    
-    
-})
+});
 
 
 server.get("/messages", (req, res) => {
@@ -76,10 +65,9 @@ server.get("/messages", (req, res) => {
     });
 
     const limit = req.query.limit || -100;
-    const limitedMessages = filteredMessages.slice(0, limit)
+    const limitedMessages = filteredMessages.slice(0, limit);
     res.send(filteredMessages.slice(limitedMessages));
-    
-})
+});
 
 
 server.post("/messages", (req, res) => {
@@ -88,38 +76,37 @@ server.post("/messages", (req, res) => {
     const clearFrom = clearHTML(from);
     const clearTo = clearHTML(to);
     const clearText = clearHTML(text);
-    const clearType= clearHTML(type);
+    const clearType = clearHTML(type);
 
     if ( (clearFrom  == '') && (clearTo == '') && (clearText == '') ) {
         return res.sendStatus(400);
-    }
+    };
     
     const participantValidation = participants.some(p => p.name === clearFrom);
     
     if (participantValidation) {
+
         if  (clearType === 'message' || clearType === 'private_message')  {
+
             messages.push(
                 { from: clearFrom,
                 to: clearTo,
                 text: clearText,
                 type: clearType, 
-                time: dayjs().format('HH:mm:ss')}
-            ); 
+                time: dayjs().format('HH:mm:ss')}); 
 
             const newFileContentM = JSON.stringify(messages);  
             fs.writeFileSync(pathMessages, newFileContentM);  
 
             return res.sendStatus(200);    
-        }
-    }
-    
-})
+        };
+    };
+});
 
 
 server.get("/participants", (req, res) => {
    res.status(200).send(participants);
-
-})
+});
 
 
 server.post("/status", (req, res) => {
@@ -136,41 +123,42 @@ server.post("/status", (req, res) => {
         fs.writeFileSync(pathParticipants, newFileContentP);  
 
         res.sendStatus(200);
-    }
-    
- })
+    };
+});
  
 
 function clearHTML(param) {
     const { result } = stripHtml(param);
     return result;
-}
+};
 
  
 function automaticRemoval() {
 
     if (participants.length > 0){
+
         participants.forEach(p => {
             const validation = Date.now() - p.lastStatus;
             
             if (validation > 10000) {
                 //expulsar participante
                 participants = participants.filter(item => item.name !== p.name);
+
                 messages.push(
                     { from: p.name, 
                     to: 'Todos', 
                     text: 'sai na sala...', 
                     type: 'status', 
-                    time: dayjs().format('HH:mm:ss')}
-                ); 
+                    time: dayjs().format('HH:mm:ss')});
+
                 const newFileContentM = JSON.stringify(messages);  
                 fs.writeFileSync(pathMessages, newFileContentM);  
                
-            }
-        })
+            };
+        });
         console.log(participants);
-    } 
-}
+    }; 
+};
 
 // Configura o servidor para rodar na porta 3000
 server.listen(3000);
